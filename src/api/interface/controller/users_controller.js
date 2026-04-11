@@ -1,4 +1,5 @@
 import env from "../../../infrastructure/env.js";
+import { dbconnection } from "../../config/db.js";
 import { ErrorResponse, SuccessResponse } from "../../config/helpers/apiResponse.js";
 import addProducts from "../../config/schema/adminAddProduct.schema.js";
 import cart from "../../config/schema/cart.schema.js";
@@ -11,6 +12,7 @@ import moment from "moment";
 
 export const UserOtpGenerate = async (req, res) => {
   try {
+    await dbconnection();
     const { email } = req.body;
 
     const otp = Math.floor(1000 + Math.random() * 9000);

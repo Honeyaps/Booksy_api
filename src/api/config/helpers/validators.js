@@ -77,8 +77,6 @@ export const AddProductValidate = object({
       .max(50, "Category cannot exceed 50 characters")
       .required(),
 
-    size: string()  // ✅ REQUIRED (important)
-      .required(),
   }),
 });
 

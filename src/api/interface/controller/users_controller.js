@@ -200,7 +200,7 @@ export const UpdatePassword = async (req, res) => {
 
 export const getProductData = async (req, res) => {
   try {
-    const { page, limit, category, priceRange, productId, size } = req.body;
+    const { page, limit, category, priceRange, productId } = req.body;
 
     const filter = {};
     if (productId) {
@@ -214,9 +214,7 @@ export const getProductData = async (req, res) => {
       } else {
         filter.productName = { $regex: new RegExp(category, 'i') };
       }
-    } if (size) {
-      filter.size = size; 
-    }
+    } 
 
     let sort = { insert_date_time: -1 }; 
 
@@ -248,7 +246,6 @@ export const getProductData = async (req, res) => {
         const userId = req.body.userId;
         const productId = req.body.productId;
         let quantity = req.body.quantity || 1;
-        const size = req.body.size;
 
         const product = await addProducts.findById(productId);
         if (!product) {
@@ -259,11 +256,10 @@ export const getProductData = async (req, res) => {
             return ErrorResponse(res, "User not found.");
         }
 
-        let cartItem = await cart.findOne({ userId, productId, size });
+        let cartItem = await cart.findOne({ userId, productId });
         if (cartItem && cartItem.status === -9) {
             cartItem.status = 1;
-            cartItem.quantity = quantity;  
-            cartItem.size = size;  
+            cartItem.quantity = quantity; 
             cartItem.insert_date_time = moment().format("YYYY-MM-DD HH:mm:ss");  
             await cartItem.save();
             return SuccessResponse(res, "Product re-added to cart successfully.", { cartItem });
@@ -281,7 +277,6 @@ export const getProductData = async (req, res) => {
               userId,
               productId,
               quantity,
-              size,
               status: 1,
               insert_date_time: moment().format("YYYY-MM-DD HH:mm:ss"),
               userDetail: {
@@ -310,9 +305,9 @@ export const getProductData = async (req, res) => {
 
 export const removeFromCart = async (req, res) => {
   try {
-    const { userId, productId, size } = req.body;
+    const { userId, productId } = req.body;
     
-    const cartItem = await cart.findOne({ userId, productId, size });
+    const cartItem = await cart.findOne({ userId, productId });
     if (!cartItem) {
       return ErrorResponse(res, "Cart item not found.");
     }
@@ -350,7 +345,7 @@ export const removeFromCart = async (req, res) => {
 
 export const buyNow = async (req, res) => {
   try {
-    const { userId, productId, address, mobileno, size } = req.body;
+    const { userId, productId, address, mobileno } = req.body;
 
     const product = await addProducts.findById(productId);
     if (!product) {
@@ -370,7 +365,6 @@ export const buyNow = async (req, res) => {
       insert_date_time: insertDateTime,
       delivery_date_time: deliveryDateTime, 
       address,
-      size,
       totalQuantity: 1,
       orderType: "buyNow",
       mobileno,
@@ -427,7 +421,6 @@ export const placeCartOrder = async (req, res) => {
       userId,
       productId: item.productId._id,
       totalQuantity: item.quantity,
-      size: item.size,
       insert_date_time: insertDateTime,
       delivery_date_time: deliveryDateTime,
       mobileno,

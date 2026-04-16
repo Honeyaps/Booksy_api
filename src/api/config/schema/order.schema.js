@@ -11,7 +11,6 @@ const orderSchema = new mongoose.Schema(
     totalQuantity: { type: Number, default: 0 }, 
     categoryQuantities: { type: Object },
     orderType: { type: String },
-    size: { type: String },
     userDetails: {
       type: Object,
       required: true

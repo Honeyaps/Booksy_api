@@ -216,7 +216,11 @@ export const getProductData = async (req, res) => {
       }
     } 
 
-    let sort = { insert_date_time: -1 }; 
+    
+    let sort = {
+      updatedAt: -1,   // ✅ UPDATED FIRST
+      createdAt: -1
+    }; 
 
     if (priceRange === "h2l") {
       sort = { price: -1 };

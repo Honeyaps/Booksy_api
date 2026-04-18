@@ -49,7 +49,7 @@ export const addProduct = async (req, res) => {
   SuccessResponse(res, "Product added successfully with images", updatedProduct);
 
   } catch (error) {
-     console.error("🔥 FULL ERROR:", error);
+     console.error("FULL ERROR:", error);
 
   return res.status(500).json({
     status: 0,
@@ -77,12 +77,12 @@ export const updateProduct = async (req, res) => {
       category: req.body.category || existingProduct.category,
       card_pic: existingProduct.card_pic, 
       images: existingProduct.images,
-      update_date_time: moment().format("YYYY-MM-DD HH:mm:ss"),
+      updatedAt: new Date(),
     };
 
     await addProducts.updateOne({ _id: id }, { $set: reqData });
-    SuccessResponse(res, "Product updated successfully, image updates in progress", { id, ...reqData });
     await uploadUpdatedImages(req.files, existingProduct);
+    SuccessResponse(res, "Product updated successfully, image updates in progress", { id, ...reqData });
   } catch (error) {
     console.error("Error updating product:", error);
     return ErrorResponse(res, "An error occurred while updating the product. Please try again later.");

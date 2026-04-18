@@ -218,7 +218,7 @@ export const getProductData = async (req, res) => {
 
     
     let sort = {
-      updatedAt: -1,   // ✅ UPDATED FIRST
+      updatedAt: -1,  
       createdAt: -1
     }; 
 

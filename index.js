@@ -4,7 +4,6 @@ import { dbconnection } from "./src/api/config/db.js";
 import { createRouter } from "./src/infrastructure/route.js";
 import env from "./src/infrastructure/env.js";
 
-
 const app = express();
 const port = env.APPPORT;
 
@@ -36,5 +35,4 @@ app.use("/v1", createRouter());
 // app.listen(port, () => {
 //   console.log(`APP listening on port:${port}`); 
 // });
-
 export default app;

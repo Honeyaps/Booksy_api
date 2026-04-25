@@ -200,21 +200,18 @@ export const UpdatePassword = async (req, res) => {
 
 export const getProductData = async (req, res) => {
   try {
-    const { page, limit, category, priceRange, productId } = req.body;
+    const { page = 1, limit = 10, category, priceRange, productId } = req.body;
 
     const filter = {};
     if (productId) {
       filter._id = productId; 
     }
-    if (category) {
-      const isCategory = await addProducts.findOne({ category: { $regex: new RegExp(category, 'i') } });
-
-      if (isCategory) {
-        filter.category = { $regex: new RegExp(category, 'i') }; 
-      } else {
-        filter.productName = { $regex: new RegExp(category, 'i') };
-      }
-    } 
+   if (category) {
+  filter.$or = [
+    { category: { $regex: new RegExp(category, 'i') } },
+    { productName: { $regex: new RegExp(category, 'i') } }
+  ];
+}
 
     
     let sort = {
@@ -231,12 +228,13 @@ export const getProductData = async (req, res) => {
     
     const skip = (page - 1) * limit;
 
-    const product = await addProducts
-      .find(filter) 
-      .skip(skip)  
-      .limit(limit)  
-      .sort(sort)    
-      .lean(); 
+   const product = await addProducts
+  .find(filter)
+  .skip(skip)
+  .limit(Number(limit))
+  .sort(sort)
+  .lean()
+  .maxTimeMS(5000); // fail fast if slow 
 
     return SuccessResponse(res, "Products found successfully.", { product });
   } catch (error) {

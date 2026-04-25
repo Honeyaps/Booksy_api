@@ -47,7 +47,7 @@ export const UserRoute = (router) => {
 
   router.post("/user/updatePass", validateRequest(UpdatePasswordValidate), UpdatePassword);
 
-  router.post("/user/getProducts", getProductData);
+  router.get("/user/getProducts", getProductData);
 
   router.post("/user/getCartItems", validateRequest(getCartItemsValidate), getCartItems);
 

@@ -230,7 +230,7 @@ export const getProductData = async (req, res) => {
 
    const product = await addProducts
   .find(filter)
-  .select("productName price card_pic category")
+  .select("productName price card_pic category images description")
   .limit(Number(limit))
   .sort(sort)
   .lean()

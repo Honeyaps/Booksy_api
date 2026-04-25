@@ -200,7 +200,7 @@ export const UpdatePassword = async (req, res) => {
 
 export const getProductData = async (req, res) => {
   try {
-    const { page = 1, limit = 10, category, priceRange, productId } = req.body;
+    const { limit = 10, category, priceRange, productId } = req.query;
 
     const filter = {};
     if (productId) {
@@ -226,15 +226,14 @@ export const getProductData = async (req, res) => {
      
     }
     
-    const skip = (page - 1) * limit;
+   
 
    const product = await addProducts
   .find(filter)
-  .skip(skip)
+  .select("productName price card_pic category")
   .limit(Number(limit))
   .sort(sort)
   .lean()
-  .maxTimeMS(5000); // fail fast if slow 
 
     return SuccessResponse(res, "Products found successfully.", { product });
   } catch (error) {

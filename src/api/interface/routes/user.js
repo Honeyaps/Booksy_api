@@ -71,6 +71,6 @@ export const UserRoute = (router) => {
 
   router.post("/user/getAllReviews", validateRequest(getAllReviewsValidate), getAllReviews);
 
-  router.post("/user/deleteReview", validateRequest(deleteReviewValidate), deleteReview);
+  router.post("/user/deleteReview", Auth, validateRequest(deleteReviewValidate), deleteReview);
 
 };

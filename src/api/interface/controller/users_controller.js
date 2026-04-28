@@ -9,6 +9,7 @@ import { sendPassResetEmail, sendSignupEmail } from "../../lib/mailer.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import moment from "moment";
+import reviews from "../../config/schema/review.schema.js";
 
 export const UserOtpGenerate = async (req, res) => {
   try {
@@ -16,16 +17,16 @@ export const UserOtpGenerate = async (req, res) => {
     const { email } = req.body;
 
     const otp = Math.floor(1000 + Math.random() * 9000);
-   
+
     await Promise.all([
       sendSignupEmail({ email, OTP: otp }),
       userSignup.updateOne(
         { email },
-        { otp, otpExpiration: Date.now() + 10 * 60 * 1000 },  
+        { otp, otpExpiration: Date.now() + 10 * 60 * 1000 },
         { upsert: true }
       )
     ]);
-    
+
     return SuccessResponse(res, 'OTP sent to your email. Please verify to complete registration.', { email });
   } catch (error) {
     console.error('Error during OTP generation:', error);
@@ -53,9 +54,9 @@ export const UserSignup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.username = username;
-    user.otp = undefined; 
-    user.otpExpiration = undefined; 
-    user.status = 1; 
+    user.otp = undefined;
+    user.otpExpiration = undefined;
+    user.status = 1;
     user.insert_date_time = moment().format("YYYY-MM-DD HH:mm:ss");
 
     const savedUser = await user.save();
@@ -71,7 +72,7 @@ export const UserSignup = async (req, res) => {
 export const UserSignin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     const user = await userSignup.findOne({ email });
     if (!user) {
       return ErrorResponse(res, "User not found.");
@@ -88,11 +89,11 @@ export const UserSignin = async (req, res) => {
     const token = jwt.sign({ id: user._id.toHexString() }, env.JWT_SECRET, { expiresIn: '2d' });
 
     await userSignup.updateOne(
-      { _id: user._id }, 
-      { $set: { status: 1 } } 
+      { _id: user._id },
+      { $set: { status: 1 } }
     );
 
-    return SuccessResponse(res, "User logged in successfully", {user:{ ...user._doc, password: undefined }, token});
+    return SuccessResponse(res, "User logged in successfully", { user: { ...user._doc, password: undefined }, token });
   } catch (error) {
     console.error(error);
     return ErrorResponse(res, "An error occurred while logging in.");
@@ -130,14 +131,14 @@ export const UserOtpForPass = async (req, res) => {
     const otp = Math.floor(1000 + Math.random() * 9000);
 
     await sendPassResetEmail({ email, OTP: otp }),
-    await userSignup.updateOne(
-        { email }, 
-        { otp, otpExpiration: Date.now() + 10 * 60 * 1000},  
-        { upsert: true } 
-    )
+      await userSignup.updateOne(
+        { email },
+        { otp, otpExpiration: Date.now() + 10 * 60 * 1000 },
+        { upsert: true }
+      )
 
     return SuccessResponse(res, 'OTP sent to your email. Please verify to complete password reset.', { email });
-    
+
   } catch (error) {
     console.error(error);
     return ErrorResponse(res, "An error occurred while generating the OTP.");
@@ -160,7 +161,7 @@ export const UserVerifyOtp = async (req, res) => {
     }
 
     user.isOtpVerified = true;
-    user.otp = undefined; 
+    user.otp = undefined;
     user.otpExpiration = undefined;
     await user.save();
 
@@ -183,11 +184,17 @@ export const UpdatePassword = async (req, res) => {
     if (!user.isOtpVerified) {
       return ErrorResponse(res, "OTP verification required before updating password.");
     }
+    const isSamePassword = await bcrypt.compare(password, user.password);
+    if (isSamePassword) {
+      return ErrorResponse(
+        res, "You cannot use your previous password. Please choose a different password."
+      );
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 10); 
+    const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
 
-    user.isOtpVerified = false; 
+    user.isOtpVerified = false;
     await user.save();
 
     return SuccessResponse(res, "Password updated successfully.", { email });
@@ -204,36 +211,36 @@ export const getProductData = async (req, res) => {
 
     const filter = {};
     if (productId) {
-      filter._id = productId; 
+      filter._id = productId;
     }
-   if (category) {
-  filter.$or = [
-    { category: { $regex: new RegExp(category, 'i') } },
-    { productName: { $regex: new RegExp(category, 'i') } }
-  ];
-}
+    if (category) {
+      filter.$or = [
+        { category: { $regex: new RegExp(category, 'i') } },
+        { productName: { $regex: new RegExp(category, 'i') } }
+      ];
+    }
 
-    
+
     let sort = {
-      updatedAt: -1,  
+      updatedAt: -1,
       createdAt: -1
-    }; 
+    };
 
     if (priceRange === "h2l") {
       sort = { price: -1 };
     } else if (priceRange === "l2h") {
       sort = { price: 1 };
-     
-    }
-    
-   
 
-   const product = await addProducts
-  .find(filter)
-  .select("productName price card_pic category images description")
-  .limit(Number(limit))
-  .sort(sort)
-  .lean()
+    }
+
+
+
+    const product = await addProducts
+      .find(filter)
+      .select("productName price card_pic category images description")
+      .limit(Number(limit))
+      .sort(sort)
+      .lean()
 
     return SuccessResponse(res, "Products found successfully.", { product });
   } catch (error) {
@@ -242,79 +249,79 @@ export const getProductData = async (req, res) => {
   }
 };
 
-  export const addToCart = async (req, res) => {
-    try {
-        const userId = req.body.userId;
-        const productId = req.body.productId;
-        let quantity = req.body.quantity || 1;
+export const addToCart = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const productId = req.body.productId;
+    let quantity = req.body.quantity || 1;
 
-        const product = await addProducts.findById(productId);
-        if (!product) {
-            return ErrorResponse(res, "Product not found.");
-        }
-        const user = await userSignup.findById(userId);
-        if (!user) {
-            return ErrorResponse(res, "User not found.");
-        }
-
-        let cartItem = await cart.findOne({ userId, productId });
-        if (cartItem && cartItem.status === -9) {
-            cartItem.status = 1;
-            cartItem.quantity = quantity; 
-            cartItem.insert_date_time = moment().format("YYYY-MM-DD HH:mm:ss");  
-            await cartItem.save();
-            return SuccessResponse(res, "Product re-added to cart successfully.", { cartItem });
-        }
-
-        if (cartItem) {
-            if (req.body.quantity) {
-                cartItem.quantity = quantity;
-            } else {
-                cartItem.quantity += 1;
-            }
-            await cartItem.save();
-        } else {
-            const newCartItem = {
-              userId,
-              productId,
-              quantity,
-              status: 1,
-              insert_date_time: moment().format("YYYY-MM-DD HH:mm:ss"),
-              userDetail: {
-                  username: user.username,
-                  email: user.email,
-              },
-              productDetail: {
-                  productId,
-                  productName: product.productName,
-                  price: product.price,
-                  card_pic: product.card_pic, 
-                  images: product.images, 
-                  description: product.description,
-                  category: product.category,
-              }
-          };
-          await cart.create(newCartItem);
-        }
-
-        return SuccessResponse(res, "Product added to cart successfully.", { cartItem });
-    } catch (error) {
-        console.error(error);
-        return ErrorResponse(res, "An error occurred while adding the product to cart.");
+    const product = await addProducts.findById(productId);
+    if (!product) {
+      return ErrorResponse(res, "Product not found.");
     }
+    const user = await userSignup.findById(userId);
+    if (!user) {
+      return ErrorResponse(res, "User not found.");
+    }
+
+    let cartItem = await cart.findOne({ userId, productId });
+    if (cartItem && cartItem.status === -9) {
+      cartItem.status = 1;
+      cartItem.quantity = quantity;
+      cartItem.insert_date_time = moment().format("YYYY-MM-DD HH:mm:ss");
+      await cartItem.save();
+      return SuccessResponse(res, "Product re-added to cart successfully.", { cartItem });
+    }
+
+    if (cartItem) {
+      if (req.body.quantity) {
+        cartItem.quantity = quantity;
+      } else {
+        cartItem.quantity += 1;
+      }
+      await cartItem.save();
+    } else {
+      const newCartItem = {
+        userId,
+        productId,
+        quantity,
+        status: 1,
+        insert_date_time: moment().format("YYYY-MM-DD HH:mm:ss"),
+        userDetail: {
+          username: user.username,
+          email: user.email,
+        },
+        productDetail: {
+          productId,
+          productName: product.productName,
+          price: product.price,
+          card_pic: product.card_pic,
+          images: product.images,
+          description: product.description,
+          category: product.category,
+        }
+      };
+      await cart.create(newCartItem);
+    }
+
+    return SuccessResponse(res, "Product added to cart successfully.", { cartItem });
+  } catch (error) {
+    console.error(error);
+    return ErrorResponse(res, "An error occurred while adding the product to cart.");
+  }
 };
 
 export const removeFromCart = async (req, res) => {
   try {
     const { userId, productId } = req.body;
-    
+
     const cartItem = await cart.findOne({ userId, productId });
     if (!cartItem) {
       return ErrorResponse(res, "Cart item not found.");
     }
 
     cartItem.status = -9;
-    cartItem.softDeleteDate = new Date(); 
+    cartItem.softDeleteDate = new Date();
     await cartItem.save();
 
     setTimeout(async () => {
@@ -358,13 +365,13 @@ export const buyNow = async (req, res) => {
     }
 
     const insertDateTime = moment().format("YYYY-MM-DD HH:mm:ss"); // Current time for order placement
-    const deliveryDateTime = moment().add(5, 'days').format("YYYY-MM-DD HH:mm:ss"); 
-    
+    const deliveryDateTime = moment().add(5, 'days').format("YYYY-MM-DD HH:mm:ss");
+
     const orderData = {
       userId,
       productId,
       insert_date_time: insertDateTime,
-      delivery_date_time: deliveryDateTime, 
+      delivery_date_time: deliveryDateTime,
       address,
       totalQuantity: 1,
       orderType: "buyNow",
@@ -378,8 +385,8 @@ export const buyNow = async (req, res) => {
         description: product.description,
         price: product.price,
         category: product.category,
-        card_pic: product.card_pic, 
-        images: product.images, 
+        card_pic: product.card_pic,
+        images: product.images,
       },
     };
     const newOrder = new order(orderData);
@@ -404,9 +411,9 @@ export const placeCartOrder = async (req, res) => {
     const cartItems = await cart
       .find({ userId, status: 1 })
       .populate({
-        path: 'productId',  
+        path: 'productId',
         model: 'addProduct_admin',
-        select: 'productName price card_pic images description category', 
+        select: 'productName price card_pic images description category',
       })
       .exec();
 
@@ -416,7 +423,7 @@ export const placeCartOrder = async (req, res) => {
 
     const totalBill = cartItems.reduce((sum, item) => sum + (item.productId.price * item.quantity), 0);
     const insertDateTime = moment().format("YYYY-MM-DD HH:mm:ss"); // Current time for order placement
-    const deliveryDateTime = moment().add(5, 'days').format("YYYY-MM-DD HH:mm:ss"); 
+    const deliveryDateTime = moment().add(5, 'days').format("YYYY-MM-DD HH:mm:ss");
 
     const orderData = cartItems.map(item => ({
       userId,
@@ -445,7 +452,7 @@ export const placeCartOrder = async (req, res) => {
 
     const newOrders = await order.insertMany(orderData);
     await cart.deleteMany({ userId, status: 1 });
-    return SuccessResponse(res, "Order placed successfully", {order: newOrders,totalBill});
+    return SuccessResponse(res, "Order placed successfully", { order: newOrders, totalBill });
   } catch (error) {
     console.error(error);
     return ErrorResponse(res, "An error occurred while placing the order.");
@@ -475,11 +482,11 @@ export const getOrderData = async (req, res) => {
 
     const filter = {};
     if (userId) {
-      filter.userId = userId; 
+      filter.userId = userId;
     }
 
-    let sort = { insert_date_time: -1 }; 
-    
+    let sort = { insert_date_time: -1 };
+
     const skip = (page - 1) * limit;
 
     const product = await order
@@ -497,5 +504,76 @@ export const getOrderData = async (req, res) => {
 };
 
 
-  
+export const addReview = async (req, res) => {
+  try {
+    const { userId, productId, comment, rating, userDetail, productDetail } = req.body;
+
+    // ✅ Check if user already reviewed this product
+    const existing = await reviews.findOne({ userId, productId });
+
+    if (existing) {
+      // 🔁 Update existing review
+      existing.comment = comment || existing.comment;
+      existing.rating = rating;
+      existing.userDetail = userDetail || existing.userDetail;
+      existing.productDetail = productDetail || existing.productDetail;
+
+      await existing.save();
+
+      return SuccessResponse(res, "Review updated successfully.");
+    }
+
+    const newComment = new reviews({
+      userId,
+      productId,
+      comment,
+      rating,
+      userDetail,
+      productDetail,
+      insert_date_time: new Date(),
+    });
+
+    await newComment.save();
+    return SuccessResponse(res, "Review added successfully.");
+
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    return ErrorResponse(res, "An error occurred while adding the review.");
+  }
+};
+
+export const getAllReviews = async (req, res) => {
+  try {
+    const { productId } = req.body;
+
+    const product = await reviews.find( { productId } ).lean();
+      if (!product || product.length === 0) {
+      return ErrorResponse(res, "No reviews found for this product.");
+    }
+
+    return SuccessResponse(res, "Products found successfully.", { product });
+  } catch (error) {
+    console.error(error);
+    return ErrorResponse(res, "An error occurred while fetching products.");
+  }
+}
+
+export const deleteReview = async (req, res) => {
+  try {
+    const { userId, productId } = req.body;
+
+    const deletedReview = await reviews.findOneAndDelete({ userId, productId });
+    if (!deletedReview) {
+      return ErrorResponse(res, "Review not found.");
+    }
+
+    return SuccessResponse(res, "Review deleted successfully.");
+   } catch (error) {
+    console.error(error);
+    return ErrorResponse(res, "An error occurred while deleting the review.");
+  }
+}
+
+
+
 

@@ -1,6 +1,9 @@
 import {
+  addReview,
   addToCart,
   buyNow,
+  deleteReview,
+  getAllReviews,
   getCartItems,
   getOrderData,
   getProductData,
@@ -15,8 +18,10 @@ import {
   UserVerifyOtp,
 } from "../controller/users_controller.js";
 import validateRequest from "../../config/helpers/validateRequest.js";
-import { addToCartValidate,
+import { addReviewValidate, addToCartValidate,
     buyNowValidate,
+    deleteReviewValidate,
+    getAllReviewsValidate,
     getCartItemsValidate,
     placeCartOrderValidate,
     removeFromCartValidate,
@@ -61,5 +66,11 @@ export const UserRoute = (router) => {
 
   router.post("/user/getOrder", getOrderData);
 
- 
+  // Auth pending
+  router.post("/user/addReview", Auth, validateRequest(addReviewValidate), addReview);
+
+  router.post("/user/getAllReviews", validateRequest(getAllReviewsValidate), getAllReviews);
+
+  router.post("/user/deleteReview", validateRequest(deleteReviewValidate), deleteReview);
+
 };

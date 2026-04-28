@@ -28,10 +28,10 @@ export const UserSignupValidate = object({
     password: string()
       .min(6, "Password must be at least 6 characters long")
       .max(20, "Password cannot exceed 20 characters")
-      // .matches(
-      //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-      //   "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
-      // )
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+        "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
+      )
       .required("Password is required"),
     })
 
@@ -121,9 +121,13 @@ export const UpdatePasswordValidate = object({
       .max(30, "Email cannot exceed 30 characters")
       .required("Email is required"),
 
-    password: string()
+      password: string()
       .min(6, "Password must be at least 6 characters long")
       .max(20, "Password cannot exceed 20 characters")
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,20}$/,
+        "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
+      )
       .required("Password is required"),
   }),
 })
@@ -212,5 +216,38 @@ export const getCartItemsValidate = object({
   body: object({
     userId: string()
       .required("User ID is required"),
+  }),
+})
+
+export const addReviewValidate = object({
+  body: object({
+    userId: string()
+      .required("User ID is required"),
+
+    productId: string()
+      .required("Product ID is required"),
+
+    rating: number()
+    .min(1, "Rating must be at least 1")
+    .max(5, "Rating cannot exceed 5"),
+    
+    comment: string(),
+  }),
+})
+
+export const getAllReviewsValidate = object({
+  body: object({
+    productId: string()
+      .required("Product ID is required"),
+  }),
+})
+
+export const deleteReviewValidate = object({
+  body: object({
+    userId: string()
+      .required("User ID is required"),
+
+    productId: string()
+      .required("Product ID is required"),
   }),
 })

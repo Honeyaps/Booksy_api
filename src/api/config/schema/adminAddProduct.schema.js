@@ -7,7 +7,7 @@ const addProductSchema = new mongoose.Schema(
     price: { type: Number },
     card_pic: { type: String, default: null },
     images: { type: [String], default: [] },
-    category: { type: String },
+    category: { type: [String] , default: [] },
   },
   {
     timestamps: true, // ✅ gives createdAt + updatedAt automatically

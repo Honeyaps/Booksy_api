@@ -506,7 +506,32 @@ export const getOrderData = async (req, res) => {
 
 export const addReview = async (req, res) => {
   try {
-    const { userId, productId, comment, rating, userDetail, productDetail } = req.body;
+    const { userId, productId, comment, rating } = req.body;
+
+      // Find user details from DB
+    const user = await userSignup.findById(userId);
+
+    if (!user) {
+      return ErrorResponse(res, "User not found");
+    }
+
+    const userDetail = {
+      username: user.username,
+      email: user.email,
+    };
+
+    // Find product details from DB
+    const product = await addProducts.findById(productId);
+
+    if (!product) {
+      return ErrorResponse(res, "Product not found");
+    }
+
+    const productDetail = {
+      productName: product.productName,
+      price: product.price,
+      category: product.category,
+    }
 
     // ✅ Check if user already reviewed this product
     const existing = await reviews.findOne({ userId, productId });

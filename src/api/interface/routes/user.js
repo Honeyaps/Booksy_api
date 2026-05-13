@@ -23,6 +23,7 @@ import { addReviewValidate, addToCartValidate,
     deleteReviewValidate,
     getAllReviewsValidate,
     getCartItemsValidate,
+    getOrderDataValidate,
     placeCartOrderValidate,
     removeFromCartValidate,
     UpdatePasswordValidate,
@@ -54,19 +55,18 @@ export const UserRoute = (router) => {
 
   router.get("/user/getProducts", getProductData);
 
-  router.post("/user/getCartItems", validateRequest(getCartItemsValidate), getCartItems);
+  router.post("/user/getCartItems", Auth, validateRequest(getCartItemsValidate), getCartItems);
 
-  router.post("/user/addToCart", validateRequest(addToCartValidate), addToCart);
+  router.post("/user/addToCart", Auth, validateRequest(addToCartValidate), addToCart);
 
-  router.post("/user/removeFromCart", validateRequest(removeFromCartValidate), removeFromCart);
+  router.post("/user/removeFromCart", Auth, validateRequest(removeFromCartValidate), removeFromCart);
 
   router.post("/user/placeCartOrder", Auth, validateRequest(placeCartOrderValidate), placeCartOrder);
 
   router.post("/user/buynow", Auth, validateRequest(buyNowValidate), buyNow);
 
-  router.post("/user/getOrder", getOrderData);
+  router.post("/user/getOrder", Auth, validateRequest(getOrderDataValidate), getOrderData);
 
-  // Auth pending
   router.post("/user/addReview", Auth, validateRequest(addReviewValidate), addReview);
 
   router.post("/user/getAllReviews", validateRequest(getAllReviewsValidate), getAllReviews);

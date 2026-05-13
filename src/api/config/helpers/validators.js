@@ -251,3 +251,10 @@ export const deleteReviewValidate = object({
       .required("Product ID is required"),
   }),
 })
+
+export const getOrderDataValidate = object({
+  body: object({
+    userId: string()
+      .required("User ID is required"),
+  }),
+})

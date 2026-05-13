@@ -569,19 +569,40 @@ export const addReview = async (req, res) => {
 
 export const getAllReviews = async (req, res) => {
   try {
-    const { productId } = req.body;
+    const {
+      productId,
+      limit = 2,
+      skip = 0,
+    } = req.body;
 
-    const product = await reviews.find( { productId } ).lean();
-      if (!product || product.length === 0) {
-      return ErrorResponse(res, "No reviews found for this product.");
-    }
+    const productReviews = await reviews
+      .find({ productId })
+      .skip(Number(skip))
+      .limit(Number(limit))
+      .lean();
 
-    return SuccessResponse(res, "Products found successfully.", { product });
+    const totalReviews = await reviews.countDocuments({
+      productId,
+    });
+
+    return SuccessResponse(
+      res,
+      "Reviews fetched successfully.",
+      {
+        product: productReviews,
+        totalReviews,
+      }
+    );
+
   } catch (error) {
     console.error(error);
-    return ErrorResponse(res, "An error occurred while fetching products.");
+
+    return ErrorResponse(
+      res,
+      "An error occurred while fetching reviews."
+    );
   }
-}
+};
 
 export const deleteReview = async (req, res) => {
   try {

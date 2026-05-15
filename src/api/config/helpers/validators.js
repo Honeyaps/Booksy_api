@@ -12,7 +12,7 @@ export const UserOtpGenerateValidate = object({
 export const UserSignupValidate = object({
   body: object({
     otp: number().
-    required("OTP is required"),
+      required("OTP is required"),
 
     username: string()
       .min(3, "Username must be at least 3 characters long")
@@ -33,7 +33,7 @@ export const UserSignupValidate = object({
         "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
       )
       .required("Password is required"),
-    })
+  })
 
 });
 
@@ -44,7 +44,7 @@ export const UserSigninValidate = object({
       .max(30, "Email cannot exceed 30 characters")
       .required("Email is required"),
 
-    password: string()  
+    password: string()
       .min(6, "Password must be at least 6 characters long")
       .max(20, "Password cannot exceed 20 characters")
       .required("Password is required"),
@@ -53,8 +53,8 @@ export const UserSigninValidate = object({
 
 export const UserLogoutValidate = object({
   body: object({
-    userId : string()
-    .required("User ID is required"),
+    userId: string()
+      .required("User ID is required"),
   }),
 })
 
@@ -121,7 +121,7 @@ export const UpdatePasswordValidate = object({
       .max(30, "Email cannot exceed 30 characters")
       .required("Email is required"),
 
-      password: string()
+    password: string()
       .min(6, "Password must be at least 6 characters long")
       .max(20, "Password cannot exceed 20 characters")
       .matches(
@@ -154,10 +154,10 @@ export const buyNowValidate = object({
       .required("Address is required"),
 
     mobileno: string()
-    .max(10, "Mobile number cannot exceed 10 characters")
-    .min(10, "Mobile number must be at least 10 characters long")
-    .matches(/^[0-9]+$/, "Mobile number can only contain numbers")
-    .required("Mobile number is required"),
+      .max(10, "Mobile number cannot exceed 10 characters")
+      .min(10, "Mobile number must be at least 10 characters long")
+      .matches(/^[0-9]+$/, "Mobile number can only contain numbers")
+      .required("Mobile number is required"),
   }),
 })
 
@@ -171,11 +171,21 @@ export const placeCartOrderValidate = object({
       .required("Address is required"),
 
     mobileno: string()
-    .max(10, "Mobile number cannot exceed 10 characters")
-    .min(10, "Mobile number must be at least 10 characters long")
-    .matches(/^[0-9]+$/, "Mobile number can only contain numbers")
-    .required("Mobile number is required"),
+      .max(10, "Mobile number cannot exceed 10 characters")
+      .min(10, "Mobile number must be at least 10 characters long")
+      .matches(/^[0-9]+$/, "Mobile number can only contain numbers")
+      .required("Mobile number is required"),
   }),
+})
+
+export const deleteOrderValidate = object({
+  body: object({
+    orderId: string()
+      .required("Order ID is required"),
+
+    userId: string()
+      .required("User ID is required"),
+  })
 })
 
 export const removeFromCartValidate = object({
@@ -203,12 +213,12 @@ export const adminSigninValidate = object({
     email: string()
       .email("Invalid email format")
       .max(30, "Email cannot exceed 30 characters")
-      .required("Email is required"), 
+      .required("Email is required"),
 
     password: string()
       .min(6, "Password must be at least 6 characters long")
       .max(20, "Password cannot exceed 20 characters")
-      .required("Password is required"),  
+      .required("Password is required"),
   }),
 })
 
@@ -228,9 +238,9 @@ export const addReviewValidate = object({
       .required("Product ID is required"),
 
     rating: number()
-    .min(1, "Rating must be at least 1")
-    .max(5, "Rating cannot exceed 5"),
-    
+      .min(1, "Rating must be at least 1")
+      .max(5, "Rating cannot exceed 5"),
+
     comment: string(),
   }),
 })

@@ -459,7 +459,33 @@ export const placeCartOrder = async (req, res) => {
   }
 };
 
+export const deleteOrder = async (req, res) => {
+  try {
+    const { orderId, userId } = req.body;
 
+    const deletedOrder = await order.findOneAndDelete({
+      _id: orderId,
+      userId: userId,
+    });
+
+    if (!deletedOrder) {
+      return ErrorResponse(res, "Order not found or unauthorized.");
+    }
+
+    return SuccessResponse(
+      res,
+      "Order deleted successfully.",
+      { order: deletedOrder }
+    );
+
+  } catch (error) {
+    console.error(error);
+    return ErrorResponse(
+      res,
+      "An error occurred while deleting the order."
+    );
+  }
+};
 
 export const getCartItems = async (req, res) => {
   try {
@@ -508,7 +534,7 @@ export const addReview = async (req, res) => {
   try {
     const { userId, productId, comment, rating } = req.body;
 
-      // Find user details from DB
+    // Find user details from DB
     const user = await userSignup.findById(userId);
 
     if (!user) {
@@ -614,7 +640,7 @@ export const deleteReview = async (req, res) => {
     }
 
     return SuccessResponse(res, "Review deleted successfully.");
-   } catch (error) {
+  } catch (error) {
     console.error(error);
     return ErrorResponse(res, "An error occurred while deleting the review.");
   }

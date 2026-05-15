@@ -2,6 +2,7 @@ import {
   addReview,
   addToCart,
   buyNow,
+  deleteOrder,
   deleteReview,
   getAllReviews,
   getCartItems,
@@ -20,6 +21,7 @@ import {
 import validateRequest from "../../config/helpers/validateRequest.js";
 import { addReviewValidate, addToCartValidate,
     buyNowValidate,
+    deleteOrderValidate,
     deleteReviewValidate,
     getAllReviewsValidate,
     getCartItemsValidate,
@@ -62,6 +64,8 @@ export const UserRoute = (router) => {
   router.post("/user/removeFromCart", Auth, validateRequest(removeFromCartValidate), removeFromCart);
 
   router.post("/user/placeCartOrder", Auth, validateRequest(placeCartOrderValidate), placeCartOrder);
+
+  router.post("/user/deleteOrder", Auth, validateRequest(deleteOrderValidate), deleteOrder);
 
   router.post("/user/buynow", Auth, validateRequest(buyNowValidate), buyNow);
 

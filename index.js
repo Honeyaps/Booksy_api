@@ -36,5 +36,4 @@ app.use("/v1", createRouter());
 //   console.log(`APP listening on port:${port}`); 
 // });
 
-
 export default app;
